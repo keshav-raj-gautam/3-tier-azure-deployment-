@@ -1,0 +1,88 @@
+---
+- name: Clone GitHub repository on all servers
+  hosts: all
+  become: true
+  vars:
+    repo_url: "https://github.com/keshav-raj-gautam/3-tier-azure-deployment.git"
+    dest_path: "/opt/3-tier-azure-deployment"
+  tasks:
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+
+    - name: Clone the repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ dest_path }}"
+        version: main
+        force: yes
+---
+
+
+- name: Build Docker image for frontend
+  hosts: frontend
+  become: true
+  vars:
+    repo_path: "/opt/3-tier-azure-deployment"
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Build Docker image for frontend
+      command: docker build -t frontend-app {{ repo_path }}/frontend
+
+
+- name: Build Docker image for backend
+  hosts: backend
+  become: true
+  vars:
+    repo_path: "/opt/3-tier-azure-deployment"
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Build Docker image for backend
+      command: docker build -t backend-app {{ repo_path }}/backend
+
+
+- name: Pull MongoDB image
+  hosts: db
+  become: true
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull MongoDB Docker image
+      docker_image:
+        name: mongo
+        tag: latest
+        source: pull
