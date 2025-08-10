@@ -1,0 +1,26 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - chat-network
+    environment:
+      - BACKEND_URL=http://backend:5001
+    restart: unless-stopped
+
+
+
+
+
+
+
+
+
+
+
+

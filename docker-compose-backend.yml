@@ -1,0 +1,23 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "80:5001"
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+    restart: unless-stopped
+
+
+
+
+
+
+
+
+
+
+
